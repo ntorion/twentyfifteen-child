@@ -101,3 +101,33 @@ add_action( 'init', 'taxonomies_article', 0 );
 
 /* Meta Boxes */
 
+add_action( 'add_meta_boxes', 'article_informations_box' );
+function article_informations_box() {
+    add_meta_box(
+        'article_informations_box',
+        __( 'Article informations', 'myplugin_textdomain' ),
+        'article_informations_box_content',
+        'article',
+        'side',
+        'high'
+    );
+}
+
+function article_informations_box_content( $post ) {
+  wp_nonce_field( plugin_basename( __FILE__ ), 'article_informations_box_content_nonce' );
+  echo '<label for="article_informations"></label>';
+  echo '<input type="text" id="article_informations" name="article_informations" placeholder="enter informations" />';
+}
+
+add_action( 'save_post', 'article_informations_box_save' );
+function article_informations_box_save( $post_id ) {
+
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+        return;
+
+    if ( !wp_verify_nonce( $_POST['article_informations_box_content_nonce'], plugin_basename( __FILE__ ) ) )
+        return;
+
+    $article_informations = $_POST['article_informations'];
+    update_post_meta( $post_id, 'article_informations', $article_informations );
+}
